@@ -46,7 +46,7 @@ async def metrics() -> dict:
 async def chat(request: Request, body: ChatRequest) -> ChatResponse:
     bind_contextvars(
         user_id_hash=hash_user_id(body.user_id),
-        session_id=body.session_id,
+        session_id=hash_user_id(body.session_id),
         feature=body.feature,
         model=os.getenv("MODEL_NAME", "mock-llm"),
         env=os.getenv("APP_ENV", "dev"),
