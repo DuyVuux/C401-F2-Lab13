@@ -35,6 +35,9 @@
 "passport_vn": r"\b[A-Z]\d{7}\b"
 ```
 
+**Thứ tự processor trong structlog pipeline:**
+`scrub_event` phải đứng **trước** `JSONRenderer`. Nếu đặt sau, dữ liệu đã được serialize thành JSON string — regex không thể match theo key/value nữa mà phải scan toàn bộ string, dễ bỏ sót. Đặt trước thì processor nhận `event_dict` dạng Python dict, có thể truy cập từng field chính xác.
+
 **Bug quan trọng đã phát hiện và fix:** Pattern `cccd` (`\b\d{12}\b`) phải đứng **trước** `phone_vn` trong dict. Nếu không, CCCD `012345678901` sẽ bị phone_vn match một phần (`012345678`) trước, để sót `01` trong log — đây là lỗ hổng security thật sự có thể bị khai thác trong adversarial testing.
 
 ---
