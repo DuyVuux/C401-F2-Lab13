@@ -21,7 +21,41 @@ Các cấu phần kỹ thuật phải hoàn thành (điền vào các `TODO` tro
 
 ---
 
-## 2. Phân công nhiệm vụ (5 Thành viên)
+## 2. Chi tiết TODO theo từng thành viên
+
+### Trần Quang Quí — Logging & PII
+- [ ] `middleware.py:13` — Clear contextvars để tránh leak giữa các request
+- [ ] `middleware.py:16` — Extract `x-request-id` từ header hoặc tự generate UUID mới
+- [ ] `middleware.py:20` — Bind `correlation_id` vào structlog contextvars
+- [ ] `middleware.py:28` — Thêm `correlation_id` và processing time vào response headers
+- [ ] `logging_config.py:45` — Đăng ký PII scrubbing processor (regex: CCCD, SĐT, email, tên)
+- [ ] `main.py:47` — Enrich log với `user_id_hash`, `session_id`, `feature`, `model`, `env`
+- [ ] Chạy `python scripts/validate_logs.py` đạt ≥ 80/100
+
+### Đoàn Nam Sơn — Tracing & Tags
+- [ ] `tracing.py` — Cấu hình Langfuse SDK (API key, project)
+- [ ] Gắn `@observe()` decorator vào các function LLM/agent call
+- [ ] Đảm bảo ≥ 10 traces hiển thị trên Langfuse UI với đầy đủ metadata
+
+### Vũ Đức Duy — SLO & Alerts
+- [ ] `config/slo.yaml` — Định nghĩa SLO (P95 latency, error rate)
+- [ ] `config/alert_rules.yaml` — Ít nhất 3 alert rules với ngưỡng cụ thể
+- [ ] `docs/alerts.md` — Viết runbook cho từng alert
+
+### Hoàng Vĩnh Giang — Load Test & Incidents
+- [ ] Chạy `python scripts/load_test.py --concurrency 5`
+- [ ] Chạy `python scripts/inject_incident.py --scenario rag_slow`
+- [ ] Viết RCA: Metrics → Traces → Logs → Root cause
+
+### Nhữ Gia Bách — Dashboard, Blueprint & Demo
+- [ ] Triển khai dashboard 6 panels theo `docs/dashboard-spec.md`
+- [ ] Điền `docs/blueprint-template.md` đầy đủ tên thành viên
+- [ ] Thu thập screenshots cho `docs/grading-evidence.md`
+- [ ] Chuẩn bị kịch bản demo 5-7 phút
+
+---
+
+## 3. Phân công nhiệm vụ (5 Thành viên)
 Nhóm gồm 5 người sẽ gánh vác 6 vai trò tiêu chuẩn bằng cách hợp nhất phần Blueprint + Demo vào chung với Dashboards.
 
 | Thành viên | Vai trò theo Lab | Nhiệm vụ chính & Các tiến trình | Files phụ trách chính |
