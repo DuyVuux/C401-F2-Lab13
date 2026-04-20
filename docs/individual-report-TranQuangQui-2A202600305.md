@@ -1,4 +1,5 @@
 # Individual Report — Trần Quang Quí
+**Student ID:** 2A202600305  
 **Role:** Member A — Logging & PII  
 **Lab:** Day 13 Observability — Healthcare Support Chatbot
 
