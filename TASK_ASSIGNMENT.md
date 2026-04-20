@@ -1,4 +1,14 @@
 # Kế Hoạch & Phân Công Nhiệm Vụ - Lab 13: Observability
+## Đề tài: Healthcare Support Chatbot
+Chatbot hỗ trợ bệnh nhân tra cứu thông tin y tế: lịch khám, hướng dẫn sử dụng thuốc, quy trình đặt lịch xét nghiệm. Bot sử dụng RAG để tìm kiếm trong cơ sở dữ liệu nội quy bệnh viện.
+
+**Chat example:**
+- User: *"Tôi là Nguyễn Văn A, CCCD 012345678, muốn đặt lịch khám nội khoa ngày mai"*
+- Bot: *"Xin chào! Phòng khám Nội khoa còn slot 9:00 và 14:30. Bạn muốn chọn giờ nào?"*
+- User: *"Số điện thoại của tôi là 0912345678, gửi xác nhận lịch hộ tôi nhé"*
+- Bot: *"Đã đặt lịch thành công! Xác nhận sẽ được gửi qua SMS."*
+
+---
 
 ## 1. Tổng quan yêu cầu của Lab
 Mục tiêu cốt lõi: Nâng cấp một "FastAPI agent" cơ bản chưa hoàn thiện trở thành một hệ thống **có tính quan sát (observable) toàn diện**.
