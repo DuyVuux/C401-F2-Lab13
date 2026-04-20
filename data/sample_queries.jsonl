@@ -1,10 +1,20 @@
-{"user_id":"u01","session_id":"s01","feature":"qa","message":"What is your refund policy? My email is student@vinuni.edu.vn"}
-{"user_id":"u02","session_id":"s02","feature":"qa","message":"Explain why metrics traces and logs work together"}
-{"user_id":"u03","session_id":"s03","feature":"summary","message":"Summarize the monitoring policy for production logging"}
-{"user_id":"u04","session_id":"s04","feature":"qa","message":"Can I get help with policy and monitoring?"}
-{"user_id":"u05","session_id":"s05","feature":"qa","message":"Here is my phone 0987654321, what should be logged?"}
-{"user_id":"u06","session_id":"s06","feature":"summary","message":"Give me a short summary of the observability workflow"}
-{"user_id":"u07","session_id":"s07","feature":"qa","message":"What should not appear in app logs?"}
-{"user_id":"u08","session_id":"s08","feature":"qa","message":"How do I debug tail latency?"}
-{"user_id":"u09","session_id":"s09","feature":"qa","message":"What is the policy for PII and credit card 4111 1111 1111 1111?"}
-{"user_id":"u10","session_id":"s10","feature":"qa","message":"How should alerts be designed?"}
+{"user_id":"u01","session_id":"s01","feature":"appointment","message":"Tôi là Nguyễn Văn A, CCCD 012345678901, muốn đặt lịch khám nội khoa ngày mai"}
+{"user_id":"u02","session_id":"s02","feature":"appointment","message":"Cho tôi đặt lịch khám tim mạch. SĐT của tôi là 0912345678"}
+{"user_id":"u03","session_id":"s03","feature":"medication","message":"Tôi đang dùng thuốc huyết áp, cần biết liều dùng và tác dụng phụ"}
+{"user_id":"u04","session_id":"s04","feature":"lab_test","message":"Quy trình đặt lịch xét nghiệm máu như thế nào? Email liên hệ: patient@gmail.com"}
+{"user_id":"u05","session_id":"s05","feature":"qa","message":"Phòng khám nội khoa mở cửa lúc mấy giờ?"}
+{"user_id":"u06","session_id":"s06","feature":"appointment","message":"Số điện thoại 0987654321, đặt lịch khám nhi cho bé 3 tuổi"}
+{"user_id":"u07","session_id":"s07","feature":"medication","message":"Thuốc paracetamol 500mg dùng như thế nào? Cho trẻ em liều bao nhiêu?"}
+{"user_id":"u08","session_id":"s08","feature":"lab_test","message":"Xét nghiệm COVID cần chuẩn bị gì? Tôi có thẻ BHYT 012345678901"}
+{"user_id":"u09","session_id":"s09","feature":"qa","message":"Chính sách hoàn lịch khám khi bệnh nhân không đến được là gì?"}
+{"user_id":"u10","session_id":"s10","feature":"summary","message":"Tóm tắt quy trình đặt lịch khám tổng quát cho bệnh nhân mới"}
+{"user_id":"u11","session_id":"s11","feature":"appointment","message":"Muốn đặt lịch khám da liễu, CCCD 098765432101, ngày 25 tháng này"}
+{"user_id":"u12","session_id":"s12","feature":"medication","message":"Có thể dùng kháng sinh amoxicillin và paracetamol cùng lúc không?"}
+{"user_id":"u13","session_id":"s13","feature":"lab_test","message":"Kết quả xét nghiệm bao lâu có? Gửi về email benhndhan@hospital.vn được không?"}
+{"user_id":"u14","session_id":"s14","feature":"qa","message":"Bệnh viện có hỗ trợ khám online hay chỉ khám trực tiếp?"}
+{"user_id":"u15","session_id":"s15","feature":"summary","message":"Tóm tắt các dịch vụ xét nghiệm và chi phí ước tính"}
+{"user_id":"u16","session_id":"s16","feature":"appointment","message":"Cần gặp bác sĩ chuyên khoa thần kinh, SĐT 0901234567"}
+{"user_id":"u17","session_id":"s17","feature":"medication","message":"Hướng dẫn bảo quản insulin đúng cách cho bệnh nhân tiểu đường"}
+{"user_id":"u18","session_id":"s18","feature":"lab_test","message":"Xét nghiệm mỡ máu cần nhịn ăn bao nhiêu tiếng? CCCD 011223344556"}
+{"user_id":"u19","session_id":"s19","feature":"qa","message":"Chính sách bảo mật thông tin bệnh nhân của bệnh viện như thế nào?"}
+{"user_id":"u20","session_id":"s20","feature":"appointment","message":"Đặt lịch khám lại sau phẫu thuật, mã bệnh nhân BN-2024-0099"}

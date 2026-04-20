@@ -1,0 +1,1390 @@
+Directory structure:
+└── C401-F2-Lab13/
+    ├── README.md
+    ├── day13-rubric-for-instructor.md
+    ├── requirements.txt
+    ├── TASK_ASSIGNMENT.md
+    ├── .env.example
+    ├── app/
+    │   ├── __init__.py
+    │   ├── agent.py
+    │   ├── incidents.py
+    │   ├── logging_config.py
+    │   ├── main.py
+    │   ├── metrics.py
+    │   ├── middleware.py
+    │   ├── mock_llm.py
+    │   ├── mock_rag.py
+    │   ├── pii.py
+    │   ├── schemas.py
+    │   └── tracing.py
+    ├── config/
+    │   ├── alert_rules.yaml
+    │   ├── logging_schema.json
+    │   └── slo.yaml
+    ├── data/
+    │   ├── expected_answers.jsonl
+    │   ├── incidents.json
+    │   └── sample_queries.jsonl
+    ├── docs/
+    │   ├── alerts.md
+    │   ├── blueprint-template.md
+    │   ├── dashboard-spec.md
+    │   └── grading-evidence.md
+    ├── scripts/
+    │   ├── inject_incident.py
+    │   ├── load_test.py
+    │   └── validate_logs.py
+    └── tests/
+        ├── test_metrics.py
+        └── test_pii.py
+
+================================================
+FILE: README.md
+================================================
+# Day 13 Observability Lab Template
+
+Template repo for a 4-hour hands-on lab on Monitoring, Logging, and Observability.
+
+## What students will build
+
+A small FastAPI "agent" instrumented with:
+- structured JSON logging
+- correlation ID propagation
+- PII scrubbing
+- Langfuse tracing
+- minimal metrics aggregation
+- SLOs, alerts, and a blueprint report
+
+This template is intentionally incomplete. Teams are expected to finish TODOs during the lab.
+
+## Suggested lab flow (Gapped Template)
+
+1. **Run the starter app**: Observe that logs are basic and correlation IDs are missing.
+2. **Implement Correlation IDs**: Fix `app/middleware.py` so every request has a unique `x-request-id`.
+3. **Enrich Logs**: Update `app/main.py` to bind user, session, and feature context to every log.
+4. **Sanitize Data**: Implement the PII scrubber in `app/logging_config.py`.
+5. **Verify with Script**: Run `python scripts/validate_logs.py` to check your progress.
+6. **Tracing**: Send 10-20 requests and verify traces in Langfuse (ensure `observe` decorator is used).
+7. **Dashboards**: Build your 6-panel dashboard from exported metrics.
+8. **Alerting**: Configure alert rules in `config/alert_rules.yaml` and test them.
+
+## Quick start
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+cp .env.example .env
+uvicorn app.main:app --reload
+```
+
+## Tooling
+
+```bash
+# Generate requests (use --concurrency 5 to test parallel bottlenecks)
+python scripts/load_test.py --concurrency 5
+
+# Inject failures live
+python scripts/inject_incident.py --scenario rag_slow
+
+# Check your implementation progress
+python scripts/validate_logs.py
+```
+
+## Repo map
+
+```text
+app/
+  main.py                FastAPI app
+  agent.py               core agent pipeline
+  logging_config.py      structlog config
+  middleware.py          correlation ID middleware
+  pii.py                 scrubbing helpers
+  tracing.py             Langfuse helpers
+  schemas.py             request/response/log models
+  metrics.py             in-memory metrics helpers
+  incidents.py           toggles for injected failures
+  mock_llm.py            deterministic fake LLM
+  mock_rag.py            deterministic fake retrieval
+config/
+  slo.yaml               starter SLOs
+  alert_rules.yaml       starter alerts
+  logging_schema.json    expected log schema
+scripts/
+  load_test.py           generate requests
+  inject_incident.py     flip incident toggles
+  validate_logs.py       schema checks for logs
+data/
+  sample_queries.jsonl   requests for testing
+  expected_answers.jsonl starter quality checks
+  incidents.json         scenario descriptions
+  logs.jsonl             app output target
+  audit.jsonl            optional audit log output
+
+docs/
+  blueprint-template.md  team submission template
+  alerts.md              runbook + alert worksheet
+  dashboard-spec.md      6-panel dashboard checklist
+  grading-evidence.md    evidence collection sheet
+  mock-debug-qa.md       oral/written debugging questions
+```
+
+## Team role suggestion
+
+- Member A: logging + PII
+- Member B: tracing + tags
+- Member C: SLO + alerts
+- Member D: load test + incident injection
+- Member E: dashboard + evidence
+- Member F: blueprint + demo lead
+
+## Grading policy (60/40 Split)
+
+Your final grade is calculated as follows:
+
+1. **Group Score (60%)**: 
+   - **Technical Implementation (30 pts)**: Verified by `validate_logs.py` and live system state.
+   - **Incident Response (10 pts)**: Accuracy of your root cause analysis in the report.
+   - **Live Demo (20 pts)**: Team presentation and system demonstration.
+2. **Individual Score (40%)**:
+   - **Individual Report (20 pts)**: Quality of your specific contributions in `docs/blueprint-template.md`.
+   - **Git Evidence (20 pts)**: Traceable work via commits and code ownership.
+
+**Passing Criteria**: 
+- All `TODO` blocks must be completed.
+- Minimum of 10 traces must be visible in Langfuse.
+- Dashboard must show all 6 required panels.
+
+
+
+================================================
+FILE: day13-rubric-for-instructor.md
+================================================
+# Rubric chấm điểm giảng viên - Day 13 Observability Lab
+
+## Mục tiêu chấm
+Rubric này áp dụng mô hình **60/40**:
+- **60 điểm Nhóm**: Đánh giá qua demo live và kết quả triển khai kỹ thuật (Logs, Traces, Dashboard, Alerts).
+- **40 điểm Cá nhân**: Đánh giá qua báo cáo phần việc tự làm, bằng chứng commit/PR, và khả năng trả lời câu hỏi trực tiếp.
+
+---
+
+## A. Group Score (Điểm Nhóm) - 60 điểm
+
+### A1. Implementation Quality (Triển khai kỹ thuật) - 30 điểm
+- **10đ - Logging & Tracing**: JSON schema đúng, có correlation ID xuyên suốt, có ít nhất 10 traces trên Langfuse với đầy đủ metadata.
+- **10đ - Dashboard & SLO**: Dashboard 6 panels rõ ràng, có đơn vị, có threshold/SLO line. Có bảng SLO hợp lý.
+- **10đ - Alerts & PII**: PII được redact hoàn toàn. Có ít nhất 3 alert rules với runbook link hoạt động.
+
+### A2. Incident Response & Debugging - 10 điểm
+- Xác định đúng root cause của incident đã inject.
+- Giải thích được flow: Metrics -> Traces -> Logs để tìm ra nguyên nhân.
+
+### A3. Live Demo & Communication - 20 điểm
+- App chạy mượt mà, không lỗi runtime bất ngờ.
+- Nhóm trình bày tự tin, rõ ràng, đúng thuật ngữ chuyên môn.
+- Giải thích được logic của middleware và logging pipeline.
+
+---
+
+## B. Individual Score (Điểm Cá nhân) - 40 điểm
+
+### B1. Individual Report & Quality - 20 điểm
+- Phần báo cáo cá nhân trong `blueprint-template.md` chi tiết, rõ ràng.
+- Hiểu sâu về phần việc mình đảm nhận (ví dụ: giải thích được regex PII hoặc cách tính P95).
+
+### B2. Evidence of Work (Commit/PR) - 20 điểm
+- Có bằng chứng đóng góp code cụ thể qua Git (Commits/PRs).
+- Tham gia vào quá trình demo phần mình phụ trách (trả lời được câu hỏi hóc búa của giảng viên).
+
+---
+
+## C. Bonus (Tối đa 10 điểm)
+- **+3đ**: Tối ưu chi phí (số liệu trước/sau).
+- **+3đ**: Dashboard đẹp, chuyên nghiệp vượt mong đợi.
+- **+2đ**: Tự động hóa (Auto-instrumentation hoặc script custom).
+- **+2đ**: Có Audit logs tách riêng.
+
+---
+
+## Điều kiện đạt (Passing Criteria)
+- VALIDATE_LOGS_SCORE đạt ít nhất 80/100.
+- Có ít nhất 10 traces live.
+- Có dashboard đủ 6 panels.
+- Có blueprint report đầy đủ tên thành viên.
+
+---
+
+## Phiếu chấm nhanh
+| Hạng mục | Điểm tối đa | Điểm đạt |
+|---|---:|---:|
+| **GROUP (60%)** | **60** | |
+| - Implementation | 30 | |
+| - Incident Debug | 10 | |
+| - Live Demo | 20 | |
+| **INDIVIDUAL (40%)** | **40** | |
+| - Individual Report | 20 | |
+| - Git Evidence | 20 | |
+| **Bonus** | 10 | |
+| **TỔNG** | **100+** | |
+
+
+
+================================================
+FILE: requirements.txt
+================================================
+fastapi==0.118.0
+uvicorn[standard]==0.37.0
+pydantic==2.11.4
+structlog==25.4.0
+python-dotenv==1.1.0
+httpx==0.28.1
+langfuse==3.2.1
+pytest==8.3.5
+
+
+
+================================================
+FILE: TASK_ASSIGNMENT.md
+================================================
+# Kế Hoạch & Phân Công Nhiệm Vụ - Lab 13: Observability
+
+## 1. Tổng quan yêu cầu của Lab
+Mục tiêu cốt lõi: Nâng cấp một "FastAPI agent" cơ bản chưa hoàn thiện trở thành một hệ thống **có tính quan sát (observable) toàn diện**.
+Các cấu phần kỹ thuật phải hoàn thành (điền vào các `TODO` trong source code):
+- **Structured JSON Logging & Correlation ID:** Tạo tracking xuyên suốt request với `x-request-id`. Bind các thông tin session, user, tính năng vào từng dòng log.
+- **Data Privacy (PII Scrubbing):** Làm sạch các dữ liệu nhạy cảm trước khi log ra ngoài hệ thống.
+- **Tracing (Langfuse):** Gắn context/trace cho hệ thống để theo dõi các tác vụ Agent/LLM thông qua decorator `@observe()`.
+- **Metrics, Dashboard & Alerts:** Tạo các chỉ số đo lường (metrics), xuất ra bảng điều khiển 6-panel, và bắt alert khi vi phạm SLO.
+- **Incident Injection & Testing:** Chạy tải (load test) và chủ động tạo tình huống sập/chậm hệ thống để ghi nhận kết quả và khắc phục.
+
+---
+
+## 2. Phân công nhiệm vụ (5 Thành viên)
+Nhóm gồm 5 người sẽ gánh vác 6 vai trò tiêu chuẩn bằng cách hợp nhất phần Blueprint + Demo vào chung với Dashboards.
+
+| Thành viên | Vai trò theo Lab | Nhiệm vụ chính & Các tiến trình | Files phụ trách chính |
+| :--- | :--- | :--- | :--- |
+| **Trần Quang Quí** | **Member A:** Logging & PII | Xử lý middleware để tạo `x-request-id`. Cập nhật file main để inject context logs. Hoàn thiện thuật toán ẩn dữ liệu nhạy cảm. Chạy pass script `validate_logs.py`. | `middleware.py`, `logging_config.py`, `main.py` |
+| **Đoàn Nam Sơn** | **Member B:** Tracing & Tags | Cấu hình SDK Langfuse, gắn decorator vào các function gọi AI/LLM. Đảm bảo toàn bộ request đều phát sinh trace hợp lệ (tối thiểu 10 traces trên cloud). | `tracing.py`, Giao diện Langfuse UI |
+| **Vũ Đức Duy** | **Member C:** SLO & Alerts | Thiết lập `slo.yaml` và `alert_rules.yaml`. Xác định ngưỡng vi phạm (VD: P95 latency hoặc Error Rate). Viết kịch bản xử lý cảnh báo trong `alerts.md`. | `slo.yaml`, `alert_rules.yaml`, `alerts.md` |
+| **Hoàng Vĩnh Giang** | **Member D:** Load Test & Incidents | Chạy script tạo request ảo (`load_test.py`) và ném lỗi có chủ đích (`inject_incident.py`). Phối hợp kiểm tra xem tracking và alert có hoạt động chính xác khi có lỗi không. | `load_test.py`, `inject_incident.py`, RCA section |
+| **Nhữ Gia Bách** | **Member E:** Dashboards, Blueprint & Demo | Triển khai Dashboard ảo hóa với 6 panels (lấy metrics từ hệ thống). Setup file `blueprint-template.md`. Thu thập log/ảnh làm chứng cứ (evidence) & Dẫn dắt buổi Demo. | Cấu hình Dashboard, `blueprint-template.md`, `grading-...` |
+
+---
+
+## 3. Lộ trình triển khai (Sprints)
+
+### Sprint 1: Nền tảng (Quí & Sơn)
+- **Quí:** Làm middleware trước tiên để mỗi dòng log có `Correlation ID`. Xử lý PII scrubber. Xong báo team để review với script `python scripts/validate_logs.py`.
+- **Sơn:** Thiết lập API keys cho Langfuse, gắn `decorator` nội bộ agent LLM. Push 15-20 calls test thử xem UI trên Langfuse đã lên vệt trace chưa. Đẩy config lên repo.
+
+### Sprint 2: Đo lường & Cảnh báo (Duy & Bách)
+- **Duy:** Dựa vào mô hình trace ở Sprint 1, tiến hành định nghĩa file YAML `slo.yaml`, `alert_rules.yaml` (các mốc time-out, error 500).
+- **Bách:** Dựa vào file `docs/dashboard-spec.md`, cài cắm công cụ hiển thị đồ thị / chart lấy log metric của nhóm thành 6 blocks đúng chuẩn.
+
+### Sprint 3: Stress-Test và Xử lý Lỗi Sự cố (Giang + Cả Team)
+- **Giang:** Chạy giả lập tải `python scripts/load_test.py --concurrency 5` và bơm lỗi `python scripts/inject_incident.py --scenario rag_slow`.
+- **Cả team phối hợp:**
+  1. File log có ghi đủ/đúng loại báo lỗi không?
+  2. Langfuse có báo đỏ node bị chậm/sập không?
+  3. Cản báo (Alerts) của Duy có bị trigger không?
+  4. Đồ thị Dashboard của Bách có gồ lên bất thường không?
+
+### Sprint 4: Báo cáo & Kiểm tra chéo
+- Tổng lực gom thông tin chụp màn hình dán vào `docs/grading-evidence.md`.
+- Duyệt qua source code 1 lần cuối xem còn sót chữ `TODO` nào không (Quyết định 30đ thực hành).
+- Nháp trước kịch bản Live Demo kéo dài 5-7 phút.
+- **Report cá nhân:** Viết đúng những đóng góp thật sự và trade-off suy nghĩ cá nhân vào bài, đảm bảo không ai giống ai (Quyết định 40đ cá nhân).
+
+
+
+================================================
+FILE: .env.example
+================================================
+APP_ENV=dev
+APP_NAME=day13-observability-lab
+LOG_LEVEL=INFO
+LOG_PATH=data/logs.jsonl
+AUDIT_LOG_PATH=data/audit.jsonl
+LANGFUSE_PUBLIC_KEY=
+LANGFUSE_SECRET_KEY=
+LANGFUSE_HOST=https://cloud.langfuse.com
+
+
+
+================================================
+FILE: app/__init__.py
+================================================
+__all__ = []
+
+
+
+================================================
+FILE: app/agent.py
+================================================
+from __future__ import annotations
+
+import time
+from dataclasses import dataclass
+
+from . import metrics
+from .mock_llm import FakeLLM
+from .mock_rag import retrieve
+from .pii import hash_user_id, summarize_text
+from .tracing import langfuse_context, observe
+
+
+@dataclass
+class AgentResult:
+    answer: str
+    latency_ms: int
+    tokens_in: int
+    tokens_out: int
+    cost_usd: float
+    quality_score: float
+
+
+class LabAgent:
+    def __init__(self, model: str = "claude-sonnet-4-5") -> None:
+        self.model = model
+        self.llm = FakeLLM(model=model)
+
+    @observe()
+    def run(self, user_id: str, feature: str, session_id: str, message: str) -> AgentResult:
+        started = time.perf_counter()
+        docs = retrieve(message)
+        prompt = f"Feature={feature}\nDocs={docs}\nQuestion={message}"
+        response = self.llm.generate(prompt)
+        quality_score = self._heuristic_quality(message, response.text, docs)
+        latency_ms = int((time.perf_counter() - started) * 1000)
+        cost_usd = self._estimate_cost(response.usage.input_tokens, response.usage.output_tokens)
+
+        langfuse_context.update_current_trace(
+            user_id=hash_user_id(user_id),
+            session_id=session_id,
+            tags=["lab", feature, self.model],
+        )
+        langfuse_context.update_current_observation(
+            metadata={"doc_count": len(docs), "query_preview": summarize_text(message)},
+            usage_details={"input": response.usage.input_tokens, "output": response.usage.output_tokens},
+        )
+
+        metrics.record_request(
+            latency_ms=latency_ms,
+            cost_usd=cost_usd,
+            tokens_in=response.usage.input_tokens,
+            tokens_out=response.usage.output_tokens,
+            quality_score=quality_score,
+        )
+
+        return AgentResult(
+            answer=response.text,
+            latency_ms=latency_ms,
+            tokens_in=response.usage.input_tokens,
+            tokens_out=response.usage.output_tokens,
+            cost_usd=cost_usd,
+            quality_score=quality_score,
+        )
+
+    def _estimate_cost(self, tokens_in: int, tokens_out: int) -> float:
+        input_cost = (tokens_in / 1_000_000) * 3
+        output_cost = (tokens_out / 1_000_000) * 15
+        return round(input_cost + output_cost, 6)
+
+    def _heuristic_quality(self, question: str, answer: str, docs: list[str]) -> float:
+        score = 0.5
+        if docs:
+            score += 0.2
+        if len(answer) > 40:
+            score += 0.1
+        if question.lower().split()[0:1] and any(token in answer.lower() for token in question.lower().split()[:3]):
+            score += 0.1
+        if "[REDACTED" in answer:
+            score -= 0.2
+        return round(max(0.0, min(1.0, score)), 2)
+
+
+
+================================================
+FILE: app/incidents.py
+================================================
+from __future__ import annotations
+
+STATE = {
+    "rag_slow": False,
+    "tool_fail": False,
+    "cost_spike": False,
+}
+
+
+def enable(name: str) -> None:
+    if name not in STATE:
+        raise KeyError(f"Unknown incident: {name}")
+    STATE[name] = True
+
+
+
+def disable(name: str) -> None:
+    if name not in STATE:
+        raise KeyError(f"Unknown incident: {name}")
+    STATE[name] = False
+
+
+
+def status() -> dict[str, bool]:
+    return dict(STATE)
+
+
+
+================================================
+FILE: app/logging_config.py
+================================================
+from __future__ import annotations
+
+import logging
+import os
+from pathlib import Path
+from typing import Any
+
+import structlog
+from structlog.contextvars import merge_contextvars
+
+from .pii import scrub_text
+
+LOG_PATH = Path(os.getenv("LOG_PATH", "data/logs.jsonl"))
+
+
+class JsonlFileProcessor:
+    def __call__(self, logger: Any, method_name: str, event_dict: dict[str, Any]) -> dict[str, Any]:
+        LOG_PATH.parent.mkdir(parents=True, exist_ok=True)
+        rendered = structlog.processors.JSONRenderer()(logger, method_name, event_dict)
+        with LOG_PATH.open("a", encoding="utf-8") as f:
+            f.write(rendered + "\n")
+        return event_dict
+
+
+
+def scrub_event(_: Any, __: str, event_dict: dict[str, Any]) -> dict[str, Any]:
+    payload = event_dict.get("payload")
+    if isinstance(payload, dict):
+        event_dict["payload"] = {
+            k: scrub_text(v) if isinstance(v, str) else v for k, v in payload.items()
+        }
+    if "event" in event_dict and isinstance(event_dict["event"], str):
+        event_dict["event"] = scrub_text(event_dict["event"])
+    return event_dict
+
+
+
+def configure_logging() -> None:
+    logging.basicConfig(format="%(message)s", level=getattr(logging, os.getenv("LOG_LEVEL", "INFO")))
+    structlog.configure(
+        processors=[
+            merge_contextvars,
+            structlog.processors.add_log_level,
+            structlog.processors.TimeStamper(fmt="iso", utc=True, key="ts"),
+            # TODO: Register your PII scrubbing processor here
+            # scrub_event,
+            structlog.processors.StackInfoRenderer(),
+            structlog.processors.format_exc_info,
+            JsonlFileProcessor(),
+            structlog.processors.JSONRenderer(),
+        ],
+        wrapper_class=structlog.make_filtering_bound_logger(logging.INFO),
+        cache_logger_on_first_use=True,
+    )
+
+
+
+def get_logger() -> structlog.typing.FilteringBoundLogger:
+    return structlog.get_logger()
+
+
+
+================================================
+FILE: app/main.py
+================================================
+from __future__ import annotations
+
+import os
+
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.responses import JSONResponse
+from structlog.contextvars import bind_contextvars
+
+from .agent import LabAgent
+from .incidents import disable, enable, status
+from .logging_config import configure_logging, get_logger
+from .metrics import record_error, snapshot
+from .middleware import CorrelationIdMiddleware
+from .pii import hash_user_id, summarize_text
+from .schemas import ChatRequest, ChatResponse
+from .tracing import tracing_enabled
+
+configure_logging()
+log = get_logger()
+app = FastAPI(title="Day 13 Observability Lab")
+app.add_middleware(CorrelationIdMiddleware)
+agent = LabAgent()
+
+
+@app.on_event("startup")
+async def startup() -> None:
+    log.info(
+        "app_started",
+        service=os.getenv("APP_NAME", "day13-observability-lab"),
+        env=os.getenv("APP_ENV", "dev"),
+        payload={"tracing_enabled": tracing_enabled()},
+    )
+
+
+@app.get("/health")
+async def health() -> dict:
+    return {"ok": True, "tracing_enabled": tracing_enabled(), "incidents": status()}
+
+
+@app.get("/metrics")
+async def metrics() -> dict:
+    return snapshot()
+
+
+@app.post("/chat", response_model=ChatResponse)
+async def chat(request: Request, body: ChatRequest) -> ChatResponse:
+    # TODO: Enrich logs with request context (user_id_hash, session_id, feature, model, env)
+    # bind_contextvars(...)
+    
+    log.info(
+        "request_received",
+        service="api",
+        payload={"message_preview": summarize_text(body.message)},
+    )
+    try:
+        result = agent.run(
+            user_id=body.user_id,
+            feature=body.feature,
+            session_id=body.session_id,
+            message=body.message,
+        )
+        log.info(
+            "response_sent",
+            service="api",
+            latency_ms=result.latency_ms,
+            tokens_in=result.tokens_in,
+            tokens_out=result.tokens_out,
+            cost_usd=result.cost_usd,
+            payload={"answer_preview": summarize_text(result.answer)},
+        )
+        return ChatResponse(
+            answer=result.answer,
+            correlation_id=request.state.correlation_id,
+            latency_ms=result.latency_ms,
+            tokens_in=result.tokens_in,
+            tokens_out=result.tokens_out,
+            cost_usd=result.cost_usd,
+            quality_score=result.quality_score,
+        )
+    except Exception as exc:  # pragma: no cover
+        error_type = type(exc).__name__
+        record_error(error_type)
+        log.error(
+            "request_failed",
+            service="api",
+            error_type=error_type,
+            payload={"detail": str(exc), "message_preview": summarize_text(body.message)},
+        )
+        raise HTTPException(status_code=500, detail=error_type) from exc
+
+
+@app.post("/incidents/{name}/enable")
+async def enable_incident(name: str) -> JSONResponse:
+    try:
+        enable(name)
+        log.warning("incident_enabled", service="control", payload={"name": name})
+        return JSONResponse({"ok": True, "incidents": status()})
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+
+@app.post("/incidents/{name}/disable")
+async def disable_incident(name: str) -> JSONResponse:
+    try:
+        disable(name)
+        log.warning("incident_disabled", service="control", payload={"name": name})
+        return JSONResponse({"ok": True, "incidents": status()})
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+
+
+================================================
+FILE: app/metrics.py
+================================================
+from __future__ import annotations
+
+from collections import Counter
+from statistics import mean
+
+REQUEST_LATENCIES: list[int] = []
+REQUEST_COSTS: list[float] = []
+REQUEST_TOKENS_IN: list[int] = []
+REQUEST_TOKENS_OUT: list[int] = []
+ERRORS: Counter[str] = Counter()
+TRAFFIC: int = 0
+QUALITY_SCORES: list[float] = []
+
+
+def record_request(latency_ms: int, cost_usd: float, tokens_in: int, tokens_out: int, quality_score: float) -> None:
+    global TRAFFIC
+    TRAFFIC += 1
+    REQUEST_LATENCIES.append(latency_ms)
+    REQUEST_COSTS.append(cost_usd)
+    REQUEST_TOKENS_IN.append(tokens_in)
+    REQUEST_TOKENS_OUT.append(tokens_out)
+    QUALITY_SCORES.append(quality_score)
+
+
+
+def record_error(error_type: str) -> None:
+    ERRORS[error_type] += 1
+
+
+
+def percentile(values: list[int], p: int) -> float:
+    if not values:
+        return 0.0
+    items = sorted(values)
+    idx = max(0, min(len(items) - 1, round((p / 100) * len(items) + 0.5) - 1))
+    return float(items[idx])
+
+
+
+def snapshot() -> dict:
+    return {
+        "traffic": TRAFFIC,
+        "latency_p50": percentile(REQUEST_LATENCIES, 50),
+        "latency_p95": percentile(REQUEST_LATENCIES, 95),
+        "latency_p99": percentile(REQUEST_LATENCIES, 99),
+        "avg_cost_usd": round(mean(REQUEST_COSTS), 4) if REQUEST_COSTS else 0.0,
+        "total_cost_usd": round(sum(REQUEST_COSTS), 4),
+        "tokens_in_total": sum(REQUEST_TOKENS_IN),
+        "tokens_out_total": sum(REQUEST_TOKENS_OUT),
+        "error_breakdown": dict(ERRORS),
+        "quality_avg": round(mean(QUALITY_SCORES), 4) if QUALITY_SCORES else 0.0,
+    }
+
+
+
+================================================
+FILE: app/middleware.py
+================================================
+from __future__ import annotations
+
+import time
+import uuid
+
+from fastapi import Request
+from starlette.middleware.base import BaseHTTPMiddleware
+from structlog.contextvars import bind_contextvars, clear_contextvars
+
+
+class CorrelationIdMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        # TODO: Clear contextvars to avoid leakage between requests
+        # clear_contextvars()
+
+        # TODO: Extract x-request-id from headers or generate a new one
+        # Use format: req-<8-char-hex>
+        correlation_id = "MISSING"
+        
+        # TODO: Bind the correlation_id to structlog contextvars
+        # bind_contextvars(correlation_id=correlation_id)
+        
+        request.state.correlation_id = correlation_id
+        
+        start = time.perf_counter()
+        response = await call_next(request)
+        
+        # TODO: Add the correlation_id and processing time to response headers
+        # response.headers["x-request-id"] = correlation_id
+        # response.headers["x-response-time-ms"] = ...
+        
+        return response
+
+
+
+================================================
+FILE: app/mock_llm.py
+================================================
+from __future__ import annotations
+
+import random
+import time
+from dataclasses import dataclass
+
+from .incidents import STATE
+
+
+@dataclass
+class FakeUsage:
+    input_tokens: int
+    output_tokens: int
+
+
+@dataclass
+class FakeResponse:
+    text: str
+    usage: FakeUsage
+    model: str
+
+
+class FakeLLM:
+    def __init__(self, model: str = "claude-sonnet-4-5") -> None:
+        self.model = model
+
+    def generate(self, prompt: str) -> FakeResponse:
+        time.sleep(0.15)
+        input_tokens = max(20, len(prompt) // 4)
+        output_tokens = random.randint(80, 180)
+        if STATE["cost_spike"]:
+            output_tokens *= 4
+        answer = (
+            "Starter answer. Teams should improve this output logic and add better quality checks. "
+            "Use retrieved context and keep responses concise."
+        )
+        return FakeResponse(text=answer, usage=FakeUsage(input_tokens, output_tokens), model=self.model)
+
+
+
+================================================
+FILE: app/mock_rag.py
+================================================
+from __future__ import annotations
+
+import time
+
+from .incidents import STATE
+
+CORPUS = {
+    "refund": ["Refunds are available within 7 days with proof of purchase."],
+    "monitoring": ["Metrics detect incidents, traces localize them, logs explain root cause."],
+    "policy": ["Do not expose PII in logs. Use sanitized summaries only."],
+}
+
+
+def retrieve(message: str) -> list[str]:
+    if STATE["tool_fail"]:
+        raise RuntimeError("Vector store timeout")
+    if STATE["rag_slow"]:
+        time.sleep(2.5)
+    lowered = message.lower()
+    for key, docs in CORPUS.items():
+        if key in lowered:
+            return docs
+    return ["No domain document matched. Use general fallback answer."]
+
+
+
+================================================
+FILE: app/pii.py
+================================================
+from __future__ import annotations
+
+import hashlib
+import re
+
+PII_PATTERNS: dict[str, str] = {
+    "email": r"[\w\.-]+@[\w\.-]+\.\w+",
+    "phone_vn": r"(?:\+84|0)[ \.-]?\d{3}[ \.-]?\d{3}[ \.-]?\d{3,4}", # Matches 090 123 4567, 090.123.4567, etc.
+    "cccd": r"\b\d{12}\b",
+    "credit_card": r"\b\d{4}[- ]?\d{4}[- ]?\d{4}[- ]?\d{4}\b",
+    # TODO: Add more patterns (e.g., Passport, Vietnamese address keywords)
+}
+
+
+def scrub_text(text: str) -> str:
+    safe = text
+    for name, pattern in PII_PATTERNS.items():
+        safe = re.sub(pattern, f"[REDACTED_{name.upper()}]", safe)
+    return safe
+
+
+def summarize_text(text: str, max_len: int = 80) -> str:
+    safe = scrub_text(text).strip().replace("\n", " ")
+    return safe[:max_len] + ("..." if len(safe) > max_len else "")
+
+
+def hash_user_id(user_id: str) -> str:
+    return hashlib.sha256(user_id.encode("utf-8")).hexdigest()[:12]
+
+
+
+================================================
+FILE: app/schemas.py
+================================================
+from __future__ import annotations
+
+from datetime import datetime, timezone
+from typing import Any, Literal
+
+from pydantic import BaseModel, Field
+
+
+class ChatRequest(BaseModel):
+    user_id: str = Field(..., examples=["u_team_01"])
+    session_id: str = Field(..., examples=["s_demo_01"])
+    feature: str = Field(default="qa", examples=["qa", "summary"])
+    message: str = Field(..., min_length=1)
+
+
+class ChatResponse(BaseModel):
+    answer: str
+    correlation_id: str
+    latency_ms: int
+    tokens_in: int
+    tokens_out: int
+    cost_usd: float
+    quality_score: float
+
+
+class LogRecord(BaseModel):
+    ts: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    level: Literal["info", "warning", "error", "critical"]
+    service: str
+    event: str
+    correlation_id: str
+    env: str
+    user_id_hash: str | None = None
+    session_id: str | None = None
+    feature: str | None = None
+    model: str | None = None
+    latency_ms: int | None = None
+    tokens_in: int | None = None
+    tokens_out: int | None = None
+    cost_usd: float | None = None
+    error_type: str | None = None
+    tool_name: str | None = None
+    payload: dict[str, Any] | None = None
+
+
+
+================================================
+FILE: app/tracing.py
+================================================
+from __future__ import annotations
+
+import os
+from typing import Any
+
+try:
+    from langfuse.decorators import observe, langfuse_context
+except Exception:  # pragma: no cover
+    def observe(*args: Any, **kwargs: Any):
+        def decorator(func):
+            return func
+        return decorator
+
+    class _DummyContext:
+        def update_current_trace(self, **kwargs: Any) -> None:
+            return None
+
+        def update_current_observation(self, **kwargs: Any) -> None:
+            return None
+
+    langfuse_context = _DummyContext()
+
+
+def tracing_enabled() -> bool:
+    return bool(os.getenv("LANGFUSE_PUBLIC_KEY") and os.getenv("LANGFUSE_SECRET_KEY"))
+
+
+
+================================================
+FILE: config/alert_rules.yaml
+================================================
+alerts:
+  - name: high_latency_p95
+    severity: P2
+    condition: latency_p95_ms > 5000 for 30m
+    type: symptom-based
+    owner: team-oncall
+    runbook: docs/alerts.md#1-high-latency-p95
+  - name: high_error_rate
+    severity: P1
+    condition: error_rate_pct > 5 for 5m
+    type: symptom-based
+    owner: team-oncall
+    runbook: docs/alerts.md#2-high-error-rate
+  - name: cost_budget_spike
+    severity: P2
+    condition: hourly_cost_usd > 2x_baseline for 15m
+    type: symptom-based
+    owner: finops-owner
+    runbook: docs/alerts.md#3-cost-budget-spike
+
+
+
+================================================
+FILE: config/logging_schema.json
+================================================
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["ts", "level", "service", "event", "correlation_id"],
+  "properties": {
+    "ts": {"type": "string"},
+    "level": {"type": "string"},
+    "service": {"type": "string"},
+    "event": {"type": "string"},
+    "correlation_id": {"type": "string"},
+    "env": {"type": ["string", "null"]},
+    "user_id_hash": {"type": ["string", "null"]},
+    "session_id": {"type": ["string", "null"]},
+    "feature": {"type": ["string", "null"]},
+    "model": {"type": ["string", "null"]},
+    "latency_ms": {"type": ["integer", "null"]},
+    "tokens_in": {"type": ["integer", "null"]},
+    "tokens_out": {"type": ["integer", "null"]},
+    "cost_usd": {"type": ["number", "null"]},
+    "error_type": {"type": ["string", "null"]},
+    "tool_name": {"type": ["string", "null"]},
+    "payload": {"type": ["object", "null"]}
+  }
+}
+
+
+
+================================================
+FILE: config/slo.yaml
+================================================
+service: day13-observability-lab
+window: 28d
+slis:
+  latency_p95_ms:
+    objective: 3000
+    target: 99.5
+    note: Replace with your group's target
+  error_rate_pct:
+    objective: 2
+    target: 99.0
+  daily_cost_usd:
+    objective: 2.5
+    target: 100.0
+  quality_score_avg:
+    objective: 0.75
+    target: 95.0
+
+
+
+================================================
+FILE: data/expected_answers.jsonl
+================================================
+{"question":"What is your refund policy?","must_include":["7 days","proof of purchase"]}
+{"question":"Explain why metrics traces and logs work together","must_include":["metrics","traces","logs"]}
+{"question":"What should not appear in app logs?","must_include":["PII","sensitive"]}
+
+
+
+================================================
+FILE: data/incidents.json
+================================================
+{
+  "rag_slow": "Retrieval latency spike. Students should find slow RAG span in trace.",
+  "tool_fail": "Vector store or tool error. Students should identify error_type from logs.",
+  "cost_spike": "Token usage spike. Students should explain higher output token cost."
+}
+
+
+
+================================================
+FILE: data/sample_queries.jsonl
+================================================
+{"user_id":"u01","session_id":"s01","feature":"qa","message":"What is your refund policy? My email is student@vinuni.edu.vn"}
+{"user_id":"u02","session_id":"s02","feature":"qa","message":"Explain why metrics traces and logs work together"}
+{"user_id":"u03","session_id":"s03","feature":"summary","message":"Summarize the monitoring policy for production logging"}
+{"user_id":"u04","session_id":"s04","feature":"qa","message":"Can I get help with policy and monitoring?"}
+{"user_id":"u05","session_id":"s05","feature":"qa","message":"Here is my phone 0987654321, what should be logged?"}
+{"user_id":"u06","session_id":"s06","feature":"summary","message":"Give me a short summary of the observability workflow"}
+{"user_id":"u07","session_id":"s07","feature":"qa","message":"What should not appear in app logs?"}
+{"user_id":"u08","session_id":"s08","feature":"qa","message":"How do I debug tail latency?"}
+{"user_id":"u09","session_id":"s09","feature":"qa","message":"What is the policy for PII and credit card 4111 1111 1111 1111?"}
+{"user_id":"u10","session_id":"s10","feature":"qa","message":"How should alerts be designed?"}
+
+
+
+================================================
+FILE: docs/alerts.md
+================================================
+# Alert Rules and Runbooks
+
+## 1. High latency P95
+- Severity: P2
+- Trigger: `latency_p95_ms > 5000 for 30m`
+- Impact: tail latency breaches SLO
+- First checks:
+  1. Open top slow traces in the last 1h
+  2. Compare RAG span vs LLM span
+  3. Check if incident toggle `rag_slow` is enabled
+- Mitigation:
+  - truncate long queries
+  - fallback retrieval source
+  - lower prompt size
+
+## 2. High error rate
+- Severity: P1
+- Trigger: `error_rate_pct > 5 for 5m`
+- Impact: users receive failed responses
+- First checks:
+  1. Group logs by `error_type`
+  2. Inspect failed traces
+  3. Determine whether failures are LLM, tool, or schema related
+- Mitigation:
+  - rollback latest change
+  - disable failing tool
+  - retry with fallback model
+
+## 3. Cost budget spike
+- Severity: P2
+- Trigger: `hourly_cost_usd > 2x_baseline for 15m`
+- Impact: burn rate exceeds budget
+- First checks:
+  1. Split traces by feature and model
+  2. Compare tokens_in/tokens_out
+  3. Check if `cost_spike` incident was enabled
+- Mitigation:
+  - shorten prompts
+  - route easy requests to cheaper model
+  - apply prompt cache
+
+
+
+================================================
+FILE: docs/blueprint-template.md
+================================================
+# Day 13 Observability Lab Report
+
+> **Instruction**: Fill in all sections below. This report is designed to be parsed by an automated grading assistant. Ensure all tags (e.g., `[GROUP_NAME]`) are preserved.
+
+## 1. Team Metadata
+- [GROUP_NAME]: 
+- [REPO_URL]: 
+- [MEMBERS]:
+  - Member A: [Name] | Role: Logging & PII
+  - Member B: [Name] | Role: Tracing & Enrichment
+  - Member C: [Name] | Role: SLO & Alerts
+  - Member D: [Name] | Role: Load Test & Dashboard
+  - Member E: [Name] | Role: Demo & Report
+
+---
+
+## 2. Group Performance (Auto-Verified)
+- [VALIDATE_LOGS_FINAL_SCORE]: /100
+- [TOTAL_TRACES_COUNT]: 
+- [PII_LEAKS_FOUND]: 
+
+---
+
+## 3. Technical Evidence (Group)
+
+### 3.1 Logging & Tracing
+- [EVIDENCE_CORRELATION_ID_SCREENSHOT]: [Path to image]
+- [EVIDENCE_PII_REDACTION_SCREENSHOT]: [Path to image]
+- [EVIDENCE_TRACE_WATERFALL_SCREENSHOT]: [Path to image]
+- [TRACE_WATERFALL_EXPLANATION]: (Briefly explain one interesting span in your trace)
+
+### 3.2 Dashboard & SLOs
+- [DASHBOARD_6_PANELS_SCREENSHOT]: [Path to image]
+- [SLO_TABLE]:
+| SLI | Target | Window | Current Value |
+|---|---:|---|---:|
+| Latency P95 | < 3000ms | 28d | |
+| Error Rate | < 2% | 28d | |
+| Cost Budget | < $2.5/day | 1d | |
+
+### 3.3 Alerts & Runbook
+- [ALERT_RULES_SCREENSHOT]: [Path to image]
+- [SAMPLE_RUNBOOK_LINK]: [docs/alerts.md#L...]
+
+---
+
+## 4. Incident Response (Group)
+- [SCENARIO_NAME]: (e.g., rag_slow)
+- [SYMPTOMS_OBSERVED]: 
+- [ROOT_CAUSE_PROVED_BY]: (List specific Trace ID or Log Line)
+- [FIX_ACTION]: 
+- [PREVENTIVE_MEASURE]: 
+
+---
+
+## 5. Individual Contributions & Evidence
+
+### [MEMBER_A_NAME]
+- [TASKS_COMPLETED]: 
+- [EVIDENCE_LINK]: (Link to specific commit or PR)
+
+### [MEMBER_B_NAME]
+- [TASKS_COMPLETED]: 
+- [EVIDENCE_LINK]: 
+
+### [MEMBER_C_NAME]
+- [TASKS_COMPLETED]: 
+- [EVIDENCE_LINK]: 
+
+### [MEMBER_D_NAME]
+- [TASKS_COMPLETED]: 
+- [EVIDENCE_LINK]: 
+
+### [MEMBER_E_NAME]
+- [TASKS_COMPLETED]: 
+- [EVIDENCE_LINK]: 
+
+---
+
+## 6. Bonus Items (Optional)
+- [BONUS_COST_OPTIMIZATION]: (Description + Evidence)
+- [BONUS_AUDIT_LOGS]: (Description + Evidence)
+- [BONUS_CUSTOM_METRIC]: (Description + Evidence)
+
+
+
+================================================
+FILE: docs/dashboard-spec.md
+================================================
+# Dashboard Spec
+
+Required Layer-2 panels:
+1. Latency P50/P95/P99
+2. Traffic (request count or QPS)
+3. Error rate with breakdown
+4. Cost over time
+5. Tokens in/out
+6. Quality proxy (heuristic, thumbs, or regenerate rate)
+
+Quality bar:
+- default time range = 1 hour
+- auto refresh every 15-30 seconds
+- visible threshold/SLO line
+- units clearly labeled
+- no more than 6-8 panels on the main layer
+
+
+
+================================================
+FILE: docs/grading-evidence.md
+================================================
+# Evidence Collection Sheet
+
+## Required screenshots
+- Langfuse trace list with >= 10 traces
+- One full trace waterfall
+- JSON logs showing correlation_id
+- Log line with PII redaction
+- Dashboard with 6 panels
+- Alert rules with runbook link
+
+## Optional screenshots
+- Incident before/after fix
+- Cost comparison before/after optimization
+- Auto-instrumentation proof
+
+
+
+================================================
+FILE: scripts/inject_incident.py
+================================================
+from __future__ import annotations
+
+import argparse
+
+import httpx
+
+BASE_URL = "http://127.0.0.1:8000"
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--scenario", required=True, choices=["rag_slow", "tool_fail", "cost_spike"])
+    parser.add_argument("--disable", action="store_true")
+    args = parser.parse_args()
+
+    path = f"/incidents/{args.scenario}/disable" if args.disable else f"/incidents/{args.scenario}/enable"
+    r = httpx.post(f"{BASE_URL}{path}", timeout=10.0)
+    print(r.status_code, r.json())
+
+
+if __name__ == "__main__":
+    main()
+
+
+
+================================================
+FILE: scripts/load_test.py
+================================================
+import argparse
+import concurrent.futures
+import json
+import time
+from pathlib import Path
+
+import httpx
+
+BASE_URL = "http://127.0.0.1:8000"
+QUERIES = Path("data/sample_queries.jsonl")
+
+
+def send_request(client: httpx.Client, payload: dict) -> None:
+    try:
+        start = time.perf_counter()
+        r = client.post(f"{BASE_URL}/chat", json=payload)
+        latency = (time.perf_counter() - start) * 1000
+        print(f"[{r.status_code}] {r.json().get('correlation_id')} | {payload['feature']} | {latency:.1f}ms")
+    except Exception as e:
+        print(f"Error: {e}")
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--concurrency", type=int, default=1, help="Number of concurrent requests")
+    args = parser.parse_args()
+
+    lines = [line for line in QUERIES.read_text(encoding="utf-8").splitlines() if line.strip()]
+    
+    with httpx.Client(timeout=30.0) as client:
+        if args.concurrency > 1:
+            with concurrent.futures.ThreadPoolExecutor(max_workers=args.concurrency) as executor:
+                futures = [executor.submit(send_request, client, json.loads(line)) for line in lines]
+                concurrent.futures.wait(futures)
+        else:
+            for line in lines:
+                send_request(client, json.loads(line))
+
+
+if __name__ == "__main__":
+    main()
+
+
+
+================================================
+FILE: scripts/validate_logs.py
+================================================
+import json
+import sys
+from pathlib import Path
+
+LOG_PATH = Path("data/logs.jsonl")
+REQUIRED_FIELDS = {"ts", "level", "service", "event", "correlation_id"}
+ENRICHMENT_FIELDS = {"user_id_hash", "session_id", "feature", "model"}
+
+def main() -> None:
+    if not LOG_PATH.exists():
+        print(f"Error: {LOG_PATH} not found. Run the app and send some requests first.")
+        sys.exit(1)
+
+    records = []
+    for line in LOG_PATH.read_text(encoding="utf-8").splitlines():
+        if not line.strip():
+            continue
+        try:
+            records.append(json.loads(line))
+        except json.JSONDecodeError:
+            continue
+
+    if not records:
+        print("Error: No valid JSON logs found in data/logs.jsonl")
+        sys.exit(1)
+
+    total = len(records)
+    missing_required = 0
+    missing_enrichment = 0
+    pii_hits = []
+    correlation_ids = set()
+
+    for rec in records:
+        # Check required fields (global)
+        if not {"ts", "level", "event"}.issubset(rec.keys()):
+            missing_required += 1
+            
+        # Context-specific checks for API requests
+        if rec.get("service") == "api":
+            if "correlation_id" not in rec or rec.get("correlation_id") == "MISSING":
+                missing_required += 1
+            
+            if not ENRICHMENT_FIELDS.issubset(rec.keys()):
+                missing_enrichment += 1
+
+        # Check PII (naive check for @ or common test credit card)
+        raw = json.dumps(rec)
+        if "@" in raw or "4111" in raw:
+            pii_hits.append(rec.get("event", "unknown"))
+
+        # Collect correlation IDs
+        cid = rec.get("correlation_id")
+        if cid and cid != "MISSING":
+            correlation_ids.add(cid)
+
+    print("--- Lab Verification Results ---")
+    print(f"Total log records analyzed: {total}")
+    print(f"Records with missing required fields: {missing_required}")
+    print(f"Records with missing enrichment (context): {missing_enrichment}")
+    print(f"Unique correlation IDs found: {len(correlation_ids)}")
+    print(f"Potential PII leaks detected: {len(pii_hits)}")
+    if pii_hits:
+        print(f"  Events with leaks: {set(pii_hits)}")
+    
+    print("\n--- Grading Scorecard (Estimates) ---")
+    score = 100
+    if missing_required > 0:
+        score -= 30
+        print("- [FAILED] Missing required fields (ts, level, etc.)")
+    else:
+        print("+ [PASSED] Basic JSON schema")
+
+    if len(correlation_ids) < 2:
+        score -= 20
+        print("- [FAILED] Correlation ID propagation (less than 2 unique IDs)")
+    else:
+        print("+ [PASSED] Correlation ID propagation")
+
+    if missing_enrichment > 0:
+        score -= 20
+        print("- [FAILED] Log enrichment (missing user_id_hash, etc.)")
+    else:
+        print("+ [PASSED] Log enrichment")
+
+    if pii_hits:
+        score -= 30
+        print("- [FAILED] PII scrubbing (found @ or test credit card)")
+    else:
+        print("+ [PASSED] PII scrubbing")
+
+    print(f"\nEstimated Score: {max(0, score)}/100")
+
+if __name__ == "__main__":
+    main()
+
+
+
+================================================
+FILE: tests/test_metrics.py
+================================================
+from app.metrics import percentile
+
+
+def test_percentile_basic() -> None:
+    assert percentile([100, 200, 300, 400], 50) >= 100
+
+
+
+================================================
+FILE: tests/test_pii.py
+================================================
+from app.pii import scrub_text
+
+
+def test_scrub_email() -> None:
+    out = scrub_text("Email me at student@vinuni.edu.vn")
+    assert "student@" not in out
+    assert "REDACTED_EMAIL" in out
+
+
