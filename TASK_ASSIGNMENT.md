@@ -33,9 +33,9 @@ Các cấu phần kỹ thuật phải hoàn thành (điền vào các `TODO` tro
 - [x] `python scripts/validate_logs.py` — **100/100**
 
 ### Đoàn Nam Sơn — Tracing & Tags
-- [ ] `tracing.py` — Cấu hình Langfuse SDK (API key, project)
-- [ ] Gắn `@observe()` decorator vào các function LLM/agent call
-- [ ] Đảm bảo ≥ 10 traces hiển thị trên Langfuse UI với đầy đủ metadata
+- [x] `tracing.py` — Cấu hình Langfuse SDK (API key, project)
+- [x] Gắn `@observe()` decorator vào các function LLM/agent call
+- [x] Đảm bảo ≥ 10 traces hiển thị trên Langfuse UI với đầy đủ metadata
 
 ### Vũ Đức Duy — Dashboard, Blueprint & Demo
 - [ ] Triển khai dashboard 6 panels theo `docs/dashboard-spec.md`
