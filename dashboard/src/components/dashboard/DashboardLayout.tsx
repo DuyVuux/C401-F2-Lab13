@@ -5,7 +5,9 @@ import { MetricCard } from '../ui/MetricCard';
 import { TimeSeriesChart } from '../ui/TimeSeriesChart';
 import { IncidentManager } from '../incidents/IncidentManager';
 import { format } from 'date-fns';
-import { Activity, Clock, DollarSign, BrainCircuit, AlertTriangle, CheckCircle, Database } from 'lucide-react';
+import { Activity, Clock, DollarSign, BrainCircuit, AlertTriangle, CheckCircle, Database, PieChart as PieChartIcon, BarChart3 } from 'lucide-react';
+import { TokenBarChart } from '../ui/TokenBarChart';
+import { ErrorDonutChart } from '../ui/ErrorDonutChart';
 
 // Keep max 60 data points (assuming 15s refresh, this is 15 minutes of hi-res window)
 const MAX_HISTORY_POINTS = 60;
@@ -78,130 +80,149 @@ export function DashboardLayout() {
     const qualityStatus = getReverseStatus(displayMetrics.quality_avg, 0.75);
 
     return (
-        <div className="p-8 max-w-[1600px] mx-auto space-y-8">
-            {/* HEADER */}
-            <header className="flex items-center justify-between border-b pb-6">
-                <div>
-                    <h1 className="text-3xl font-bold tracking-tight">System Observability</h1>
-                    <p className="text-muted-foreground mt-1 text-sm">Lab13 Enterprise Analytics & SLO Tracking</p>
-                </div>
-                <div className="flex items-center space-x-4">
-                    <div className={`flex items-center px-3 py-1 rounded-full text-xs font-medium border ${isHealthError || (!metrics && !isMetricsLoading) ? 'border-red-500/50 bg-red-500/10 text-red-500' : 'border-green-500/50 bg-green-500/10 text-green-500'
-                        }`}>
-                        <span className={`w-2 h-2 rounded-full mr-2 animate-pulse ${isHealthError || (!metrics && !isMetricsLoading) ? 'bg-red-500' : 'bg-green-500'}`}></span>
-                        {isHealthError || (!metrics && !isMetricsLoading) ? 'API Disconnected' : 'API Healthy'}
+        <div className="min-h-screen bg-[#020617] bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(59,130,246,0.15),rgba(255,255,255,0))] text-slate-100 font-sans selection:bg-blue-500/30">
+            <div className="p-8 max-w-[1600px] mx-auto space-y-8 relative z-10">
+                {/* HEADER */}
+                <header className="flex items-center justify-between border-b border-slate-800 pb-6">
+                    <div>
+                        <h1 className="text-4xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-slate-100 to-slate-400">System Observability</h1>
+                        <p className="text-slate-400 mt-2 text-sm font-medium">Lab13 Enterprise Analytics & SLO Tracking</p>
                     </div>
-                </div>
-            </header>
-
-            {/* METRIC CARDS GRID */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <MetricCard
-                    title="Latency (p95)"
-                    value={`${displayMetrics.latency_p95.toFixed(0)} ms`}
-                    subValue={`p50: ${displayMetrics.latency_p50.toFixed(0)}ms | p99: ${displayMetrics.latency_p99.toFixed(0)}ms`}
-                    icon={<Clock className="w-4 h-4" />}
-                    status={latencyStatus}
-                />
-                <MetricCard
-                    title="Error Rate"
-                    value={`${errorRate.toFixed(2)}%`}
-                    subValue={`${totalErrors} failures / ${displayMetrics.traffic} req`}
-                    icon={<AlertTriangle className="w-4 h-4" />}
-                    status={errorStatus}
-                />
-                <MetricCard
-                    title="Daily Cost"
-                    value={`$${displayMetrics.total_cost_usd.toFixed(2)}`}
-                    subValue={`Avg: $${displayMetrics.avg_cost_usd.toFixed(4)}/req`}
-                    icon={<DollarSign className="w-4 h-4" />}
-                    status={costStatus}
-                />
-                <MetricCard
-                    title="Quality Score"
-                    value={displayMetrics.quality_avg.toFixed(2)}
-                    subValue="Scale: 0.0 - 1.0"
-                    icon={<CheckCircle className="w-4 h-4" />}
-                    status={qualityStatus}
-                />
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <MetricCard className="lg:col-span-2"
-                    title="Total Traffic (Requests)"
-                    value={displayMetrics.traffic}
-                    icon={<Activity className="w-4 h-4" />}
-                />
-                <MetricCard className="lg:col-span-2"
-                    title="Token Usage"
-                    value={displayMetrics.tokens_in_total + displayMetrics.tokens_out_total}
-                    subValue={`IN: ${displayMetrics.tokens_in_total} | OUT: ${displayMetrics.tokens_out_total}`}
-                    icon={<Database className="w-4 h-4" />}
-                />
-            </div>
-
-            {/* CHARTS & INCIDENTS REPOSITORY */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-                {/* Main Chart Area */}
-                <div className="lg:col-span-2 space-y-6">
-                    <div className="rounded-xl border bg-card p-6 shadow-sm">
-                        <h3 className="font-semibold text-lg mb-4 flex items-center">
-                            <Clock className="w-4 h-4 mr-2 text-muted-foreground" />
-                            Latency History (P95)
-                        </h3>
-                        <TimeSeriesChart
-                            data={metricsHistory}
-                            dataKey="latency_p95"
-                            xAxisKey="time"
-                            color="hsl(var(--amber-500))"
-                            sloThreshold={3000}
-                            sloLabel="SLO Limit (3000ms)"
-                            height={260}
-                            valueFormatter={(v) => `${v}ms`}
-                        />
+                    <div className="flex items-center space-x-4">
+                        <div className={`flex items-center px-3 py-1 rounded-full text-xs font-medium border ${isHealthError || (!metrics && !isMetricsLoading) ? 'border-red-500/50 bg-red-500/10 text-red-500' : 'border-green-500/50 bg-green-500/10 text-green-500'
+                            }`}>
+                            <span className={`w-2 h-2 rounded-full mr-2 animate-pulse ${isHealthError || (!metrics && !isMetricsLoading) ? 'bg-red-500' : 'bg-green-500'}`}></span>
+                            {isHealthError || (!metrics && !isMetricsLoading) ? 'API Disconnected' : 'API Healthy'}
+                        </div>
                     </div>
+                </header>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="rounded-xl border bg-card p-6 shadow-sm">
-                            <h3 className="font-semibold text-lg mb-4 flex items-center">
-                                <BrainCircuit className="w-4 h-4 mr-2 text-muted-foreground" />
-                                Quality Score Degradation
+                {/* METRIC CARDS GRID */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <MetricCard
+                        title="Latency (p95)"
+                        value={`${displayMetrics.latency_p95.toFixed(0)} ms`}
+                        subValue={`p50: ${displayMetrics.latency_p50.toFixed(0)}ms | p99: ${displayMetrics.latency_p99.toFixed(0)}ms`}
+                        icon={<Clock className="w-4 h-4" />}
+                        status={latencyStatus}
+                    />
+                    <MetricCard
+                        title="Error Rate"
+                        value={`${errorRate.toFixed(2)}%`}
+                        subValue={`${totalErrors} failures / ${displayMetrics.traffic} req`}
+                        icon={<AlertTriangle className="w-4 h-4" />}
+                        status={errorStatus}
+                    />
+                    <MetricCard
+                        title="Daily Cost"
+                        value={`$${displayMetrics.total_cost_usd.toFixed(2)}`}
+                        subValue={`Avg: $${displayMetrics.avg_cost_usd.toFixed(4)}/req`}
+                        icon={<DollarSign className="w-4 h-4" />}
+                        status={costStatus}
+                    />
+                    <MetricCard
+                        title="Quality Score"
+                        value={displayMetrics.quality_avg.toFixed(2)}
+                        subValue="Scale: 0.0 - 1.0"
+                        icon={<CheckCircle className="w-4 h-4" />}
+                        status={qualityStatus}
+                    />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <MetricCard className="lg:col-span-2"
+                        title="Total Traffic (Requests)"
+                        value={displayMetrics.traffic}
+                        icon={<Activity className="w-4 h-4" />}
+                    />
+                    <MetricCard className="lg:col-span-2"
+                        title="Token Usage"
+                        value={displayMetrics.tokens_in_total + displayMetrics.tokens_out_total}
+                        subValue={`IN: ${displayMetrics.tokens_in_total} | OUT: ${displayMetrics.tokens_out_total}`}
+                        icon={<Database className="w-4 h-4" />}
+                    />
+                </div>
+
+                {/* CHARTS & INCIDENTS REPOSITORY */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+                    {/* Main Chart Area */}
+                    <div className="lg:col-span-2 space-y-6">
+                        <div className="rounded-2xl border border-slate-700/50 bg-slate-800/30 backdrop-blur-2xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.4)]">
+                            <h3 className="font-semibold text-lg mb-4 flex items-center text-slate-100">
+                                <Clock className="w-5 h-5 mr-3 text-amber-400" />
+                                Latency History (P95)
                             </h3>
                             <TimeSeriesChart
                                 data={metricsHistory}
-                                dataKey="quality_avg"
+                                dataKey="latency_p95"
                                 xAxisKey="time"
-                                color="hsl(var(--blue-500))"
-                                sloThreshold={0.75}
-                                sloLabel="SLO Limit (0.75)"
-                                height={200}
+                                color="#fbbf24" // Brighter Vivid Amber
+                                sloThreshold={3000}
+                                sloLabel="SLO Limit (3000ms)"
+                                height={260}
+                                valueFormatter={(v) => `${v}ms`}
                             />
                         </div>
-                        <div className="rounded-xl border bg-card p-6 shadow-sm">
-                            <h3 className="font-semibold text-lg mb-4 flex items-center">
-                                <DollarSign className="w-4 h-4 mr-2 text-muted-foreground" />
-                                Cost Accumulation
-                            </h3>
-                            <TimeSeriesChart
-                                data={metricsHistory}
-                                dataKey="total_cost_usd"
-                                xAxisKey="time"
-                                color="hsl(var(--green-500))"
-                                sloThreshold={2.50}
-                                sloLabel="SLO Daily Budget ($2.5)"
-                                height={200}
-                                valueFormatter={(v) => `$${v}`}
-                            />
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="rounded-2xl border border-slate-700/50 bg-slate-800/30 backdrop-blur-2xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.4)]">
+                                <h3 className="font-semibold text-lg mb-4 flex items-center text-slate-100">
+                                    <BrainCircuit className="w-5 h-5 mr-3 text-blue-400" />
+                                    Quality Score
+                                </h3>
+                                <TimeSeriesChart
+                                    data={metricsHistory}
+                                    dataKey="quality_avg"
+                                    xAxisKey="time"
+                                    color="#60a5fa" // Brighter Vivid Blue
+                                    sloThreshold={0.75}
+                                    sloLabel="SLO Limit (0.75)"
+                                    height={200}
+                                />
+                            </div>
+                            <div className="rounded-2xl border border-slate-700/50 bg-slate-800/30 backdrop-blur-2xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.4)]">
+                                <h3 className="font-semibold text-lg mb-4 flex items-center text-slate-100">
+                                    <DollarSign className="w-5 h-5 mr-3 text-emerald-400" />
+                                    Cost Accumulation
+                                </h3>
+                                <TimeSeriesChart
+                                    data={metricsHistory}
+                                    dataKey="total_cost_usd"
+                                    xAxisKey="time"
+                                    color="#34d399" // Brighter Vivid Emerald
+                                    sloThreshold={2.50}
+                                    sloLabel="SLO Budget ($2.5)"
+                                    height={200}
+                                    valueFormatter={(v) => `$${v}`}
+                                />
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="rounded-2xl border border-slate-700/50 bg-slate-800/30 backdrop-blur-2xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.4)]">
+                                <h3 className="font-semibold text-lg mb-4 flex items-center text-slate-100">
+                                    <PieChartIcon className="w-5 h-5 mr-3 text-rose-400" />
+                                    Error Breakdown (Donut)
+                                </h3>
+                                <ErrorDonutChart errorBreakdown={displayMetrics.error_breakdown} height={220} />
+                            </div>
+                            <div className="rounded-2xl border border-slate-700/50 bg-slate-800/30 backdrop-blur-2xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.4)]">
+                                <h3 className="font-semibold text-lg mb-4 flex items-center text-slate-100">
+                                    <BarChart3 className="w-5 h-5 mr-3 text-indigo-400" />
+                                    I/O Token Usage (Bar)
+                                </h3>
+                                <TokenBarChart inTokens={displayMetrics.tokens_in_total} outTokens={displayMetrics.tokens_out_total} height={220} />
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                {/* Incident Manager Sidebar */}
-                <div>
-                    <IncidentManager incidents={health?.incidents || {}} />
-                </div>
+                    {/* Incident Manager Sidebar */}
+                    <div>
+                        <IncidentManager incidents={health?.incidents || {}} />
+                    </div>
 
+                </div>
             </div>
         </div>
     );

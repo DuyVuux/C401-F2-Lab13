@@ -29,11 +29,11 @@ export function IncidentManager({ incidents }: IncidentManagerProps) {
     ];
 
     return (
-        <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
+        <div className="rounded-2xl border border-slate-700/50 bg-slate-800/30 backdrop-blur-2xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.4)] text-slate-100">
             <div className="flex justify-between items-center mb-6">
                 <div>
-                    <h2 className="text-lg font-semibold tracking-tight">Incident Control Panel</h2>
-                    <p className="text-sm text-muted-foreground font-mono mt-1">POST /incidents/&#123;name&#125;</p>
+                    <h2 className="text-xl font-bold tracking-tight text-white mb-1">Incident Control Panel</h2>
+                    <p className="text-sm font-mono text-indigo-300 bg-indigo-500/10 px-2 py-0.5 rounded inline-block">POST /incidents/&#123;name&#125;</p>
                 </div>
             </div>
 
@@ -43,9 +43,9 @@ export function IncidentManager({ incidents }: IncidentManagerProps) {
                     const isPending = toggleMutation.isPending && toggleMutation.variables?.name === incident.key;
 
                     return (
-                        <div key={incident.key} className="flex items-center justify-between p-3 rounded-lg border border-border/50 bg-secondary/20">
+                        <div key={incident.key} className="flex items-center justify-between p-4 rounded-xl border border-slate-700/50 bg-slate-900/50 shadow-inner">
                             <div className="flex items-center space-x-3">
-                                <div className={cn("p-2 rounded-full", isActive ? "bg-red-500/10 text-red-500" : "bg-muted text-muted-foreground")}>
+                                <div className={cn("p-2.5 rounded-full", isActive ? "bg-red-500/20 text-red-400 shadow-[0_0_15px_rgba(248,113,113,0.4)]" : "bg-slate-800 text-slate-400")}>
                                     {incident.icon}
                                 </div>
                                 <span className="font-medium text-sm">{incident.label}</span>
