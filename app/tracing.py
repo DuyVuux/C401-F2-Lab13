@@ -21,21 +21,22 @@ from __future__ import annotations
 import logging
 import os
 from typing import Any
+from dotenv import load_dotenv
+load_dotenv()
 
 logger = logging.getLogger(__name__)
-
+logger.info("TRACING FILE LOADED")
 # ---------------------------------------------------------------------------
 # Attempt real SDK import
 # ---------------------------------------------------------------------------
 
 try:
     from langfuse import Langfuse
-    from langfuse.decorators import langfuse_context, observe
+    from langfuse.decorators import observe, langfuse_context
 
     _KEYS_PRESENT = bool(
         os.getenv("LANGFUSE_PUBLIC_KEY") and os.getenv("LANGFUSE_SECRET_KEY")
     )
-
     if _KEYS_PRESENT:
         # Explicit client — reads env vars automatically.
         # Creating it here (not lazily) means a wrong key surfaces at startup.
@@ -44,6 +45,8 @@ try:
             secret_key=os.environ["LANGFUSE_SECRET_KEY"],
             host=os.getenv("LANGFUSE_HOST", "https://cloud.langfuse.com"),
         )
+
+        
 
         # --- Auth check -------------------------------------------------------
         # Verifies network reachability + key validity.
@@ -74,12 +77,13 @@ try:
         )
 
     _SDK_AVAILABLE = True
+    print("Không lỗi import")
 
-except ImportError:
+except ImportError as e:
     # Package not installed — provide stubs so app still imports cleanly.
+    print("Có lỗi import")
     _SDK_AVAILABLE = False
     _client = None
-
     def observe(*args: Any, **kwargs: Any):  # type: ignore[misc]
         """No-op decorator used when langfuse package is absent."""
         def decorator(func: Any) -> Any:
@@ -98,6 +102,7 @@ except ImportError:
 
     langfuse_context = _DummyContext()  # type: ignore[assignment]
     logger.warning("langfuse package not installed. Tracing disabled.")
+    
 
 
 # ---------------------------------------------------------------------------

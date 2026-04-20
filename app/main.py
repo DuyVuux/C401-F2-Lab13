@@ -13,7 +13,7 @@ from .metrics import record_error, snapshot
 from .middleware import CorrelationIdMiddleware
 from .pii import hash_user_id, summarize_text
 from .schemas import ChatRequest, ChatResponse
-from .tracing import tracing_enabled
+from app.tracing import tracing_enabled, flush
 
 configure_logging()
 log = get_logger()
@@ -24,6 +24,12 @@ agent = LabAgent()
 
 @app.on_event("startup")
 async def startup() -> None:
+    from app.tracing import tracing_enabled
+    import os
+
+    print("PUBLIC:", os.getenv("LANGFUSE_PUBLIC_KEY"))
+    print("SECRET:", os.getenv("LANGFUSE_SECRET_KEY"))
+    print("TRACING ENABLED:", tracing_enabled())
     log.info(
         "app_started",
         service=os.getenv("APP_NAME", "day13-observability-lab"),
@@ -73,6 +79,7 @@ async def chat(request: Request, body: ChatRequest) -> ChatResponse:
             cost_usd=result.cost_usd,
             payload={"answer_preview": summarize_text(result.answer)},
         )
+        flush()
         return ChatResponse(
             answer=result.answer,
             correlation_id=request.state.correlation_id,

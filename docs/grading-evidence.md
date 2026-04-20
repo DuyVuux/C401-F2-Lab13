@@ -80,14 +80,30 @@ Khắc phục:
 
 
 ## Required screenshots
-- Langfuse trace list with >= 10 traces
-- One full trace waterfall
-- JSON logs showing correlation_id
-- Log line with PII redaction
-- Dashboard with 6 panels
-- Alert rules with runbook link
+- Langfuse trace list with >= 10 traces: [Langfuse_tracing](/screenshot/trace_list.png)
 
-## Optional screenshots
-- Incident before/after fix
-- Cost comparison before/after optimization
-- Auto-instrumentation proof
+- JSON logs showing correlation_id, log line with PII redaction: 
+
+```json
+{
+  "service": "api",
+  "payload": {
+    "message_preview": "Quy trình đặt lịch xét nghiệm máu như thế nào? Email liên hệ: [REDACTED_EMAIL]"
+  },
+  "event": "request_received",
+  "user_id_hash": "75af07890985",
+  "feature": "lab_test",
+  "session_id": "s04",
+  "env": "dev",
+  "correlation_id": "req-8a3e6201",
+  "model": "mock-llm",
+  "level": "info",
+  "ts": "2026-04-20T08:52:56.683645Z"
+}
+```
+- Dashboard with 6 panels
+
+  - [Image 1](/screenshot/dashboard1.png)
+  - [Image 2](/screenshot/dashboard2.png)
+
+
