@@ -1,0 +1,49 @@
+system:
+  name: Healthcare Support Chatbot
+  description: Chatbot hỗ trợ bệnh nhân tra cứu thông tin y tế, đặt lịch khám, hướng dẫn sử dụng thuốc, xét nghiệm.
+  base_url: http://<team-host>:9999
+
+endpoints:
+  chat:
+    method: POST
+    path: /chat
+    request:
+      user_id:
+        type: string
+        required: true
+        example: "patient_nguyen_van_a"
+      session_id:
+        type: string
+        required: true
+        example: "session_001"
+      feature:
+        type: string
+        required: false
+        default: "qa"
+        enum: [qa, appointment, medication, lab_test, summary]
+      message:
+        type: string
+        required: true
+        min_length: 1
+        example: "Tôi muốn đặt lịch khám nội khoa ngày mai"
+    response:
+      answer: string
+      correlation_id: string
+      latency_ms: integer
+      tokens_in: integer
+      tokens_out: integer
+      cost_usd: float
+      quality_score: float
+
+  health:
+    method: GET
+    path: /health
+
+  metrics:
+    method: GET
+    path: /metrics
+
+pii_handling:
+  redacted_fields: [email, phone_vn, cccd, credit_card, passport_vn]
+  user_id: hashed (SHA-256, first 12 chars)
+  session_id: hashed (SHA-256, first 12 chars)
