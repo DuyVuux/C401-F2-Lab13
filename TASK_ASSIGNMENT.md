@@ -23,14 +23,14 @@ Các cấu phần kỹ thuật phải hoàn thành (điền vào các `TODO` tro
 
 ## 2. Chi tiết TODO theo từng thành viên
 
-### Trần Quang Quí — Logging & PII
-- [ ] `middleware.py:13` — Clear contextvars để tránh leak giữa các request
-- [ ] `middleware.py:16` — Extract `x-request-id` từ header hoặc tự generate UUID mới
-- [ ] `middleware.py:20` — Bind `correlation_id` vào structlog contextvars
-- [ ] `middleware.py:28` — Thêm `correlation_id` và processing time vào response headers
-- [ ] `logging_config.py:45` — Đăng ký PII scrubbing processor (regex: CCCD, SĐT, email, tên)
-- [ ] `main.py:47` — Enrich log với `user_id_hash`, `session_id`, `feature`, `model`, `env`
-- [ ] Chạy `python scripts/validate_logs.py` đạt ≥ 80/100
+### Trần Quang Quí — Logging & PII ✅ DONE (score: 100/100)
+- [x] `middleware.py` — Clear contextvars để tránh leak giữa các request
+- [x] `middleware.py` — Extract `x-request-id` từ header hoặc tự generate UUID mới
+- [x] `middleware.py` — Bind `correlation_id` vào structlog contextvars
+- [x] `middleware.py` — Thêm `correlation_id` và processing time vào response headers
+- [x] `logging_config.py` — Đăng ký PII scrubbing processor (regex: CCCD, SĐT, email, credit card)
+- [x] `main.py` — Enrich log với `user_id_hash`, `session_id`, `feature`, `model`, `env`
+- [x] `python scripts/validate_logs.py` — **100/100**
 
 ### Đoàn Nam Sơn — Tracing & Tags
 - [ ] `tracing.py` — Cấu hình Langfuse SDK (API key, project)
@@ -46,7 +46,17 @@ Các cấu phần kỹ thuật phải hoàn thành (điền vào các `TODO` tro
 ### Hoàng Vĩnh Giang — Load Test & Incidents
 - [ ] Chạy `python scripts/load_test.py --concurrency 5`
 - [ ] Chạy `python scripts/inject_incident.py --scenario rag_slow`
-- [ ] Viết RCA: Metrics → Traces → Logs → Root cause
+- [ ] Viết RCA vào `docs/grading-evidence.md` theo mẫu sau:
+
+  > **Incident:** P95 latency tăng từ ~150ms lên ~3000ms.
+  >
+  > **Metrics:** Dashboard panel "Latency P95" vượt ngưỡng SLO 2000ms.
+  >
+  > **Traces:** Langfuse cho thấy span `rag_retrieve` chiếm ~2800ms/request, các span khác bình thường.
+  >
+  > **Logs:** Log với `correlation_id` tương ứng ghi `latency_ms` cao bất thường.
+  >
+  > **Root Cause:** Incident `rag_slow` được bật qua `/incidents/rag_slow/enable`, làm RAG retrieval sleep nhân tạo. Khắc phục bằng `/incidents/rag_slow/disable`.
 
 ### Nhữ Gia Bách — SLO & Alerts
 - [ ] `config/slo.yaml` — Định nghĩa SLO (P95 latency, error rate)
